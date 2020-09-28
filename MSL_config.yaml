@@ -1,7 +1,14 @@
 ---
+data_path: /lustre/scratch/astro/xcs/XMM_observations/data/
+
 id_results_loc : /lustre/scratch/astro/xcs/XMM_observations/code/xapa/id_results
 
-fits_path: /lustre/scratch/astro/xcs/XMM_observations/data/{obs}/images/{obs}-0.50-2.00keVmerged_img.fits
+fits_path: "{obs}/images/{obs}-0.50-2.00keVmerged_img.fits"
+
+
+
+
+
 
 cameras:
     - pn
@@ -42,7 +49,6 @@ obsid_keys:
     - CTYPE2
 
 
-data_path: /lustre/scratch/astro/xcs/XMM_observations/data/
 
 detections:
     src_file: all_srcsums.dat

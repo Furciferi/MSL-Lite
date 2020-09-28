@@ -486,7 +486,9 @@ class MSL:
         # column with a NONE. Insert the value for all rows with that obsid
         obsid_set = list(set(df_master["OBSID"]))
         for obsid in tqdm(obsid_set):
-            obsid_path = self._params["fits_path"].format(obs=obsid)
+            obsid_path = os.path.join(
+                                self._params["data_path"],
+                                self._params["fits_path"].format(obs=obsid))
             df_master[df_master["OBSID"]==obsid][key]
             if os.path.exists(obsid_path):
                 header = fits.open(obsid_path)[0].header
@@ -684,6 +686,7 @@ class MSL:
 
 
 if __name__ == "__main__":
+
     msl = MSL(debug=True)
     msl.process_idresults_files()
     msl.aggregate_srcsums()
@@ -697,4 +700,4 @@ if __name__ == "__main__":
     msl.sort_master_by(column = "OBSID")
     msl.log_sig()
     msl.make_source_csv()
-    # msl.write_master_to_csv("./MSL.csv")
+    msl.write_master_to_csv("./MSL.csv")
