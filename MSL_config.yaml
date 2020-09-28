@@ -1,0 +1,206 @@
+---
+id_results_loc : /lustre/scratch/astro/xcs/XMM_observations/code/xapa/id_results
+
+fits_path: /lustre/scratch/astro/xcs/XMM_observations/data/{obs}/images/{obs}-0.50-2.00keVmerged_img.fits
+
+cameras:
+    - pn
+    - mos1
+    - mos2
+obsid_keys:
+    - INSTRUME
+    - EXPIDSTR
+    - FILTER
+    - SUBMODE
+    - EXPOSURE
+    - EMSCI001
+    - EMSCI002
+    - EMSCI003
+    - EMSCI004
+    - DATE-OBS
+    - DATE-END
+    - REVOLUT
+    - OBJECT
+    - OBSERVER
+    - RA_OBJ
+    - DEC_OBJ
+    - RA_NOM
+    - DEC_NOM
+    - EQUINOX
+    - RA_PNT
+    - DEC_PNT
+    - PA_PNT
+    - CDELT1
+    - CDELT2
+    - CRPIX1
+    - CRPIX2
+    - NAXIS1
+    - NAXIS2
+    - CRVAL1
+    - CRVAL2
+    - CTYPE1
+    - CTYPE2
+
+
+data_path: /lustre/scratch/astro/xcs/XMM_observations/data/
+
+detections:
+    src_file: all_srcsums.dat
+    sig_file: all_finalsigs.dat
+    outname: Detection.csv
+    finalsig_header:
+        - OBSID
+        - ROW
+        - CENTRAL_X
+        - CENTRAL_Y
+        - RX
+        - RY
+        - RX_IN
+        - RY_IN
+        - RX_OUT
+        - RY_OUT
+        - SOURCE_VAL
+        - BKG_VAL
+        - AVG_SOURCE_EXP
+        - AVG_BKG_EXP
+        - BKG_COUNTS
+        - BKG_COUNTS_SOURCE
+        - TOTAL_COUNTS
+        - SOURCE_COUNTS
+        - UNKNOWN_0
+        - UNKNOWN_1
+    sig_err_y:
+        - 0.72176212
+        - 0.48871478
+        - 0.45301104
+        - 0.43422586
+        - 0.48650712
+        - 0.46009827
+        - 0.50112462
+        - 0.44033578
+        - 0.46410432
+        - 0.48867762
+        - 0.49048382
+        - 0.49177179
+        - 0.61700135
+        - 0.55632204
+        - 0.63752556
+        - 0.64372653
+    sig_err_x:
+        - 0.6397934
+        - 0.29697925
+        - 0.45576108
+        - 0.51599234
+        - 0.51994246
+        - 0.51755387
+        - 0.54528749
+        - 0.51611882
+        - 0.53839397
+        - 0.5169825
+        - 0.46860227
+        - 0.51556933
+        - 0.56091738
+        - 0.61446857
+        - 0.80951732
+        - 0.74738902
+    key_swap:
+        PSF_SIZE_FLAG:
+            ok : n
+            psfsize: y
+        POINT_CON:
+            ok: n
+            yes: y
+        RUN1_CON:
+            ok: n
+            yes: y
+    in_header:
+            - OBSID
+            - ROW
+            - RA
+            - DEC
+            - CENTRAL_X
+            - CENTRAL_Y
+            - RX
+            - RY
+            - ROTATION
+            - UNKNOWN_0
+            - UNKNOWN_1
+            - SOURCE_COUNTS
+            - COUNT_RATE
+            - COUNT_RATE_ERR
+            - FLUX
+            - SIG
+            - PPOINT
+            - PSF_SIZE_FLAG
+            - POINT_CON
+            - RUN1_CON
+    out_header:
+        - ROW
+        - XCS_NAME
+        - OBSID
+        - RA
+        - DEC
+        - CENTRAL_X
+        - CENTRAL_Y
+        - X_ERR
+        - Y_ERR
+        - RX
+        - RY
+        - ROTATION
+        - THETA
+        - PHI
+        - SOURCE_COUNTS
+        - COUNT_RATE
+        - COUNT_RATE_ERR
+        - FLUX
+        - SIG
+        - PPOINT
+        - TYPE
+        - PSF_SIZE_FLAG
+        - POINT_CON
+        - RUN1_CON
+        - RX_IN
+        - RY_IN
+        - RX_OUT
+        - RY_OUT
+        - SOURCE_VAL
+        - BKG_VAL
+        - AVG_SOURCE_EXP
+        - AVG_BKG_EXP
+        - BKG_COUNTS
+        - BKG_COUNTS_SOURCE
+        - TOTAL_COUNTS
+        - SOURCE_COUNTS
+        - ID
+
+results_files_to_process:
+    in_files:
+        - final_sigs_all.dat
+        - final_source_summaries.dat
+    out_files:
+        - all_finalsigs.dat
+        - all_srcsums.dat
+
+# Config files for the MSL output csvs
+output_csvs:
+  detection: Detections.yaml
+  observation: Observation.yaml
+  source: Source.yaml
+  exposure: Exposure.yaml
+  indiv: Individual_Exposure.yaml
+
+
+merged_header:
+  - CRVAL1
+  - CRVAL2
+  - CRPIX1
+  - CRPIX2
+  - CTYPE1
+  - CTYPE2
+  - NAXIS1
+  - NAXIS2
+  - CDELT1
+  - CDELT2
+  - RA_PNT
+  - DEC_PNT
+  - PA_PNT

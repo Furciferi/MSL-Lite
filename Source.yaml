@@ -1,0 +1,24 @@
+---
+outfile: Source.csv
+header:
+  - XCS_NAME
+  - OBSID
+  - RA
+  - DEC
+  - SOURCE_COUNTS
+  - COUNT_RATE
+  - FLUX
+  - HARD_COUNTS
+  - HARD_RATE
+  - HARD_RATIO
+  - SIG_LOG
+  - HARD_SIG
+  - PPOINT
+  - EXT
+  - ID
+  - PSF_SIZE_FLAG
+  - POINT_CON
+  - RUN1_CON
+  - TARGET_FLAG
+  - CLS_FLAG
+  - SNR_FLAG

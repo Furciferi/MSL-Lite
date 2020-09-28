@@ -1,0 +1,5 @@
+astropy==3.0
+pandas==1.1.2
+tqdm==4.19.8
+numpy==1.18.1
+PyYAML==5.3.1
