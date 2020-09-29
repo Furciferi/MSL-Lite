@@ -36,7 +36,7 @@ class MSL:
 
         if self._debug:
             tqdm.pandas(ascii=True)
-
+        self._limit_obsids = None
 
     def _load_config_file(self):
         """
@@ -66,6 +66,17 @@ class MSL:
                                 h=RA_h,r_m=RA_m,r_s=RA_s,
                                 sign=sign,d=DEC_d,d_m=DEC_m,d_s=DEC_s)
         return xcs_name
+
+    def limit_obsids_by_csv(self):
+        try:
+            tmp = pd.read_csv(self._params["limit_obsids_by_csv"])
+            obsids = tmp[self._params["limit_obsids_colname"]].apply(MSL.fix_OBSID).tolsit()
+        except Exception as e:
+            print("Could not load obsid limit csv")
+
+        self._limit_obsids = obsids
+
+
 
 
     def set_config_filepath(self,path: str):
@@ -217,6 +228,9 @@ class MSL:
         if self._debug_size:
                 df_master = df_master.sample(self._debug_size
                                         ).reset_index(drop=True)
+        if self._limit_obsids:
+            print("Limiting OBSIDS based on csv", self._params["limit_obsids_by_csv"])
+            df_master[df_master["OBSID"].isin(self._limit_obsids)].reset_index(drop=True)
         self._df_master = df_master
 
 
@@ -690,6 +704,7 @@ if __name__ == "__main__":
     msl = MSL(debug=True)
     msl.process_idresults_files()
     msl.aggregate_srcsums()
+    msl.limit_obsids_by_csv()
     msl.aggregate_finalsigs()
     msl.create_master_df()
     msl.set_column_float(column = "SOURCE_COUNTS")
