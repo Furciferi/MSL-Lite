@@ -71,10 +71,10 @@ class MSL:
         try:
             tmp = pd.read_csv(self._params["limit_obsids_by_csv"])
             obsids = tmp[self._params["limit_obsids_colname"]].apply(MSL.fix_OBSID).tolist()
+            self._limit_obsids = obsids
         except Exception as e:
             print("Could not load obsid limit csv")
 
-        self._limit_obsids = obsids
 
 
 
