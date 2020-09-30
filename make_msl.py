@@ -70,7 +70,7 @@ class MSL:
     def limit_obsids_by_csv(self):
         try:
             tmp = pd.read_csv(self._params["limit_obsids_by_csv"])
-            obsids = tmp[self._params["limit_obsids_colname"]].apply(MSL.fix_OBSID).tolsit()
+            obsids = tmp[self._params["limit_obsids_colname"]].apply(MSL.fix_OBSID).tolist()
         except Exception as e:
             print("Could not load obsid limit csv")
 
@@ -212,7 +212,6 @@ class MSL:
         # throw away the dupelicate columns
         to_drop = [x for x in df_master if x.endswith('_spare')]
         df_master.drop(to_drop,axis=1,inplace=True)
-        print(df_master.columns)
         # Create a new column containing the XCS naming convention
         df_master.insert(   1,
                             "XCS_NAME",
@@ -230,7 +229,7 @@ class MSL:
                                         ).reset_index(drop=True)
         if self._limit_obsids:
             print("Limiting OBSIDS based on csv", self._params["limit_obsids_by_csv"])
-            df_master[df_master["OBSID"].isin(self._limit_obsids)].reset_index(drop=True)
+            df_master = df_master[df_master["OBSID"].isin(self._limit_obsids)].reset_index(drop=True)
         self._df_master = df_master
 
 
@@ -334,6 +333,7 @@ class MSL:
                                                     MSL.fix_OBSID)
 
 
+
     @staticmethod
     def get_unique_and_duplicates(dataframe: pd.DataFrame, radius: float,
                                     verbose: bool = False):
@@ -351,13 +351,14 @@ class MSL:
             print("Converting Dataframe to Astropy Skycoords")
         # Create a catalogue of the sky positions using astropy
         cat = SkyCoord( ra = dataframe.RA.to_numpy()*u.degree,
-                        dec = dataframe.DEC.to_numpy() *u.degree)
+                        dec = dataframe.DEC.to_numpy() *u.degree, frame='fk5')
 
         if verbose:
             print("Calculating matches against itself - this may take a while")
         # Match the catalog against itself to find obsids
-        idxc, idxcatalog, d2d, d3d = cat.search_around_sky(cat,
+        idxcatalog, idxc, d2d, d3d = cat.search_around_sky(cat,
                                                     radius*u.arcsecond)
+
 
         # Work through the matched rows, if the objects are in the same
         # observation, then not a duplicate, but if in another, count as
@@ -376,20 +377,18 @@ class MSL:
             # Grab all the idxs which where within the radius
             match_index = idxcatalog[idxc==index]
             # If it matched to itself, no other sources so unique
-            if match_index.shape[0]==1:
-                unique[index]=1
-            else:
-                # check if the obsids are different - ie same source
-                # if the same obsids, then they are different sources.
-                no_clash =[]
-                for ind in match_index:
-                    if dataframe.loc[index,"OBSID"]!=dataframe.loc[ind,"OBSID"]:
-                        no_clash += [dataframe.loc[ind,"ID"]]
-                        seen[ind]=1
-                # write list of duplicates associated with the "best" source
-                # to the duplicate dataframe incase we need to look at these
-                # at a later date/analysis
-                dupes[dataframe.loc[index,"ID"]]=no_clash
+            unique[index]=1
+            # check if the obsids are different - ie same source
+            # if the same obsids, then they are different sources.
+            no_clash =[]
+            for ind in match_index:
+                if dataframe.loc[index,"OBSID"]!=dataframe.loc[ind,"OBSID"]:
+                    no_clash += [dataframe.loc[ind,"ID"]]
+                    seen[ind]=1
+            # write list of duplicates associated with the "best" source
+            # to the duplicate dataframe incase we need to look at these
+            # at a later date/analysis
+            dupes[dataframe.loc[index,"ID"]]=no_clash
         return dataframe[unique.astype(bool)]["ID"],dupes
 
     @staticmethod
@@ -413,6 +412,7 @@ class MSL:
             raise MSLSequenceError
 
         df_master["EXT"] = df_master["PPOINT"].progress_apply(MSL.get_source_type)
+        self._df_master = df_master
 
     def remove_duplicates(self):
         """
@@ -446,11 +446,15 @@ class MSL:
                                 radius = 5,
                                 verbose = self._debug
                                 )
-
+        if self._debug:
+            print("Total unique sources after removing dupes",
+                    len(pnt_ids.values)+len(ext_ids.values))
         # Now we have the list of unique and duplicate IDs we reduce the
         # master dataframe to only the unique IDs
-        df_master = df_master[df_master.index.isin(ext_ids + pnt_ids)]
+        df_master = df_master[df_master.ID.isin(ext_ids.tolist() + pnt_ids.values.tolist())]
 
+        #Overwrite the master dataframe to remove dupes
+        self._df_master = df_master
         # TODO:
         # And we create a new dictionary of the duplicate IDs and write to
         # a pickle file.
@@ -477,6 +481,7 @@ class MSL:
                 return "y"
 
         df_master[column] = df_master[column].progress_apply(swap)
+        self._df_master = df_master
 
 
     def add_OBSID_wcs(self):
@@ -516,6 +521,8 @@ class MSL:
                 print("Obsid Path does not exist:{}".format(obsid_path))
                 for key in keys:
                     df_master.loc[df_master["OBSID"]==obsid, key] = "NONE"
+
+        self._df_master = df_master
 
     def add_theta_phi_to_master(self):
         """
@@ -572,8 +579,10 @@ class MSL:
 
         df_master["PHI"] = list_phi
         df_master["THETA"] = list_theta
+        if self._debug:
+            print("There are", len(bad_idx), "source that we could not calcualte PHI and THETA for")
         df_master = df_master.drop(bad_idx).reset_index(drop=True)
-
+        self._df_master = df_master
 
     def add_sig_error(self):
         """
@@ -614,7 +623,7 @@ class MSL:
         tmp = df_master.progress_apply(calc_sig_err,args=(sig_x,sig_y), axis=1, result_type='expand')
         df_master["XERR"] = tmp[0]
         df_master["YERR"] = tmp[1]
-
+        self._df_master = df_master
 
     def log_sig(self):
         """
@@ -633,7 +642,7 @@ class MSL:
             else:
                 return -1000.0
         df_master.loc[:,"SIG_LOG"] = df_master["SIG"].apply(logit)
-
+        self._df_master = df_master
 
     def make_source_csv(self):
         """
@@ -673,7 +682,7 @@ class MSL:
         # And write the MSL
         df_master[src_params["header"]].to_csv(src_params["outfile"],
                                                 index=None,header=None)
-
+        self._df_master = df_master
 
     def all_columns_if_float(self):
         """
@@ -695,7 +704,7 @@ class MSL:
         for column in tqdm(df_master.columns):
             df_master[column] = df_master[column].apply(try_float)
 
-
+        self._df_master = df_master
 
 
 
@@ -703,16 +712,18 @@ if __name__ == "__main__":
 
     msl = MSL(debug=True)
     msl.process_idresults_files()
-    msl.aggregate_srcsums()
     msl.limit_obsids_by_csv()
+    msl.aggregate_srcsums()
     msl.aggregate_finalsigs()
     msl.create_master_df()
     msl.set_column_float(column = "SOURCE_COUNTS")
     msl.sort_master_by(column = "SOURCE_COUNTS")
     msl.set_master_ID()
     msl.flag_source_type()
+    msl.write_master_to_csv("./MSL.csv")
     msl.remove_duplicates()
-    msl.sort_master_by(column = "OBSID")
+    msl.sort_master_by(column = "DEC", ascending=True)
+    msl.sort_master_by(column = "RA", ascending=True)
+    msl.sort_master_by(column = "OBSID", ascending=True)
     msl.log_sig()
     msl.make_source_csv()
-    msl.write_master_to_csv("./MSL.csv")

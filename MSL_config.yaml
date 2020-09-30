@@ -1,11 +1,11 @@
 ---
-data_path: /lustre/scratch/astro/xcs/XMM_observations/data/
+data_path: ../ELIAS/data/
 
-id_results_loc : /lustre/scratch/astro/xcs/XMM_observations/code/xapa/id_results
+id_results_loc : ../ELIAS/id_results
 
 fits_path: "{obs}/images/{obs}-0.50-2.00keVmerged_img.fits"
 
-limit_obsids_by_csv: "MSL" # if this is set, the MSL will only use obsids in this csv
+limit_obsids_by_csv: "idl_limit.csv" # if this is set, the MSL will only use obsids in this csv
 limit_obsids_colname: "OBSID" # please make sure this is set to your columnname
 
 
