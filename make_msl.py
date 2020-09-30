@@ -16,7 +16,6 @@ from tqdm import tqdm
 
 from msl_exceptions import MSLSequenceError
 
-print(pd.__version__)
 class MSL:
     def __init__(self, debug: bool = False, debug_size: int = 0,
                  low_mem: bool = False):
